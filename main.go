@@ -6,6 +6,9 @@ import (
     "math/rand"
     "net/http"
     "log"
+
+    "personal/wsservice/routes"
+    "personal/wsservice/wsocket"
 )
 
 type IPv4 int
@@ -48,22 +51,13 @@ func (driver *Driver) getCoordinate() {
     fmt.Printf("driver time:%d\n", driver.coor.pTime.Hour()) 
 }
 
-func lookForDrivers(w http.ResponseWriter, r *http.Request){
-    w.Header().Set("Content-Type","text/plain")
-    fmt.Fprintf(w, "here should be a list of drivers in your zone")
-}
-func homeSite(w http.ResponseWriter, r *http.Request){
-    w.Header().Set("Content-Type","text/plain")
-    fmt.Fprintf(w, "hello from main")
-}
-
 func main() {
     //driver1:=new(Driver)
     //driver1.setLocation(1,1)
     //driver1.getCoordinate()
-
-    http.HandleFunc("/drivers", lookForDrivers)
-    http.HandleFunc("/", homeSite)
+    http.HandleFunc("/drivers", routes.LookforDrivers)
+    http.HandleFunc("/", routes.Homesite)
+    http.HandleFunc("/ws", routes.WsHandler)
 
     log.Printf("starting a basic server on port 8080")
     http.ListenAndServe(":8080", nil)
