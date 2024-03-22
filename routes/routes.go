@@ -1,11 +1,24 @@
 package routes
 
-fmt (
+import (
     "log"
     "fmt"
 
-    "gtihub.com/gorilla/socket"
+    "net/http"
+    "personal/wsservice/subprocess"
 )
+
+func CheckProcess(w http.ResponseWriter, r *http.Request){
+    subprocess.ChecktheRunning("ffmpeg")
+}
+
+func Playthevideo (w http.ResponseWriter, r *http.Request) {
+    log.Printf("playing the video")
+    subprocess.StartFfmpeg()
+    w.Header().Set("Contet-Type", "Text/plain")
+    fmt.Fprintf(w, "playing the video")
+
+}
 
 func LookforDrivers(w http.ResponseWriter, r *http.Request){
     log.Printf("%s /drivers\n",r.Method)
@@ -20,7 +33,6 @@ func Homesite(w http.ResponseWriter, r *http.Request){
     fmt.Fprintf(w, "hello from home\n")
 }
 
-func Wshandler(w http.ResponseWriter, r *http.Request){
+func WsHandler(w http.ResponseWriter, r *http.Request){
     log.Println("%s /ws", r.Method)
-    socket.WsocketHandler(w,r)
 }
