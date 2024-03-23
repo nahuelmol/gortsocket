@@ -6,6 +6,9 @@ import (
     "math/rand"
     "net/http"
     "log"
+    "os"
+
+    "github.com/joho/godotenv"
 
     "personal/wsservice/routes"
     "personal/wsservice/wsocket"
@@ -56,14 +59,31 @@ func main() {
     //driver1.setLocation(1,1)
     //driver1.getCoordinate()
 
+    err := godotenv.Load()
+    if err != nil {
+        fmt.Printf("error loading the environment variables")
+    }
+    myport := os.Getenv("PORT")
+    environment := os.Getenv("ENVIRONMENT")
+    port := ":" + myport
+
+    if environment != "production" {
+        fmt.Printf("in development\n")
+    }
+
     http.HandleFunc("/play", routes.Playthevideo)
     http.HandleFunc("/check", routes.CheckProcess)
 
     http.HandleFunc("/ws", socket.TheWSconn)
 
     http.HandleFunc("/lookdriver", routes.LookforDrivers)//users looking for drivers
-    http.HandleFunc("/showmyself", routes.ShowMe) //for drivers
+    http.HandleFunc("/bevisible", routes.BeVisible) //for drivers
 
-    log.Printf("starting a basic server on port 8080")
-    http.ListenAndServe(":7777", nil)
+
+    http.HandleFunc("/login", routes.Login)
+    http.HandleFunc("/register", routes.Register)
+    http.HandleFunc("/logout", routes.Logout)
+
+    log.Printf("starting on localhost%s", port)
+    http.ListenAndServe(port, nil)
 }

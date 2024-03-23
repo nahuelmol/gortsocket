@@ -19,7 +19,9 @@ func Playthevideo (w http.ResponseWriter, r *http.Request) {
     fmt.Fprintf(w, "playing the video")
 
 }
-func ShowMe(w http.ResponseWriter, r *http.Request){
+
+func BeVisible(w http.ResponseWriter, r *http.Request){
+    fmt.Printf("making the driver")
     //driver will send messages to all the users that near
     //I must take the real time dirver's location 
     //I must send location to user within the minimum area
