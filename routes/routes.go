@@ -19,7 +19,16 @@ func Playthevideo (w http.ResponseWriter, r *http.Request) {
     fmt.Fprintf(w, "playing the video")
 
 }
+func ShowMe(w http.ResponseWriter, r *http.Request){
+    //driver will send messages to all the users that near
+    //I must take the real time dirver's location 
+    //I must send location to user within the minimum area
 
+
+    //redirect the dirver to a frontend page
+    //this frontend page should start a ws connections
+    //this frontend must sed location data
+}
 func LookforDrivers(w http.ResponseWriter, r *http.Request){
     log.Printf("%s /drivers\n",r.Method)
     w.Header().Set("Content-Type","text/plain")

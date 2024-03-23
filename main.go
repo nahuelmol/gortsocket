@@ -55,15 +55,15 @@ func main() {
     //driver1:=new(Driver)
     //driver1.setLocation(1,1)
     //driver1.getCoordinate()
-    http.HandleFunc("/drivers", routes.LookforDrivers)
-    http.HandleFunc("/", routes.Homesite)
-    http.HandleFunc("/wshandler", routes.WsHandler)
 
     http.HandleFunc("/play", routes.Playthevideo)
     http.HandleFunc("/check", routes.CheckProcess)
 
     http.HandleFunc("/ws", socket.TheWSconn)
 
+    http.HandleFunc("/lookdriver", routes.LookforDrivers)//users looking for drivers
+    http.HandleFunc("/showmyself", routes.ShowMe) //for drivers
+
     log.Printf("starting a basic server on port 8080")
-    http.ListenAndServe(":8080", nil)
+    http.ListenAndServe(":7777", nil)
 }
