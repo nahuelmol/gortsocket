@@ -2,7 +2,8 @@ package routes
 
 import (
     "net/http"
-    "personal/wsservice/auth"
+    
+    "personal/wsservice/authapi"
 )
 //this file just distributes the login and register logics by its routes
 func Login(r http.ResponseWriter, w *http.Request){
