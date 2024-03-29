@@ -1,28 +1,30 @@
-
 package db
 
 import (
-    "log"
     "github.com/redis/go-redis/v9"
 )
+
 type RedisClient struct {
-    Addr
-    Password
-    DB
+    Addr string
+    Password string
+    DB int
+    Protocol int
 }
 
-func CreateClient (Addr, Password, db string) *RedisClient {
-    return &RedisClient {
-        Addr,
-        Password,
-        db,
+func SetOptions()  *redis.Options {
+    return &redis.Options{
+        Addr: "",
+        Password: "",
+        DB: 0,
+        Protocol:3,
     }
 }
 
-func conn() *redis.NewClient {
-    client_object := CreateClient("","","")
-    rclient := redis.NewClient(&redis.Options{RedisClient})
+func Conn() *redis.Client {
+    client := SetOptions()
+    rclient := redis.NewClient(client)
 
     return rclient
 }
+
 

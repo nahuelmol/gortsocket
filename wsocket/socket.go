@@ -1,10 +1,11 @@
 package socket 
 
 import ( 
-    "fmt"
     "log"
     "net/http"
     "encoding/json"
+    
+    "personal/wsservice/db"
     
     "github.com/gorilla/websocket"
 )
@@ -21,11 +22,6 @@ func TheWSconn(w http.ResponseWriter, r *http.Request){
     }
     defer conn.Close()
 
-    
-        
-    
-   
-
     for {
         msgType, p, err := conn.ReadMessage()
         if err != nil {
@@ -40,12 +36,11 @@ func TheWSconn(w http.ResponseWriter, r *http.Request){
             json.Unmarshal([]byte(json_string), &params)
 
             username := params["username"].(string)
-            id := params["id"].(float64)
+            id := params["id"].(string)
             access_key := params["access_key"].(string)
 
-            fmt.Println(username)
-            fmt.Println(id)
-            fmt.Println(access_key)
+            log.Println("ckecking the %s\n data", username)
+            db.AccessKeyInDB(access_key, id)
 
             log.Println("text message")
         case websocket.BinaryMessage:

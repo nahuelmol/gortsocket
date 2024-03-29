@@ -21,7 +21,7 @@ func Playthevideo (w http.ResponseWriter, r *http.Request) {
 }
 
 func BeVisible(w http.ResponseWriter, r *http.Request){
-    fmt.Printf("making the driver")
+    fmt.Printf("making the driver visible")
     //driver will send messages to all the users that near
     //I must take the real time dirver's location 
     //I must send location to user within the minimum area
@@ -30,7 +30,10 @@ func BeVisible(w http.ResponseWriter, r *http.Request){
     //redirect the dirver to a frontend page
     //this frontend page should start a ws connections
     //this frontend must sed location data
+    http.Redirect(w,r, "ws://localhost:7777/ws", http.StatusTemporaryRedirect)
+    fmt.Fprintf(w, "hello from home\n")
 }
+
 func LookforDrivers(w http.ResponseWriter, r *http.Request){
     log.Printf("%s /drivers\n",r.Method)
     w.Header().Set("Content-Type","text/plain")
