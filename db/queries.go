@@ -28,11 +28,12 @@ func GetPair(key string){
     }
 }
 
-func AccessSetting(access_key, user string) bool {
+func AccessSetting(access_key string, user uint32) bool {
+    userid := string(user)
     lifetime := 2 * time.Hour
 
     conn := Conn()
-    err := conn.Set(ctx, access_key, user, lifetime).Err()
+    err := conn.Set(ctx, access_key, userid, lifetime).Err()
     if err != nil {
         log.Println("error setting access key")
         return false
@@ -42,7 +43,8 @@ func AccessSetting(access_key, user string) bool {
     }
 }
 
-func AccessKeyInDB(access_key, user string) bool {
+func AccessKeyInDB(access_key string, user uint32) bool {
+    userid := string(user)
     fmt.Println("checking if access key for the user exists in db")
     conn := Conn()
     
@@ -51,7 +53,7 @@ func AccessKeyInDB(access_key, user string) bool {
         log.Println("error getting")
         return false
     } else {
-        if val == user {
+        if val == userid {
             log.Printf("value: %s exists", val)
             return true
         } else {

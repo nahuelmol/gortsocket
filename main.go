@@ -8,6 +8,7 @@ import (
 
     "github.com/joho/godotenv"
 
+    "personal/wsservice/obj"
     "personal/wsservice/routes"
     "personal/wsservice/wsocket"
 )
@@ -15,6 +16,7 @@ import (
 type IPv4 int
 type IPv6 int
 
+var hmanyConnections int = 0
 
 func corsMiddleware(next http.Handler) http.Handler {
     return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request){
@@ -32,10 +34,22 @@ func corsMiddleware(next http.Handler) http.Handler {
     })
 }
 
+func exampleWare(next http.Handler) http.Handler {
+    nh := func(w http.ResponseWriter, r *http.Request){
+
+        fmt.Fprintf(w, "starting\n")
+        next.ServeHTTP(w, r)
+        fmt.Fprintf(w, "\nfinished")
+    }
+    return http.HandlerFunc(nh)
+}
+
 func main() {
     //driver1:=new(Driver)
     //driver1.setLocation(1,1)
     //driver1.getCoordinate()
+    UserRegister := make(map[uint32]*obj.StackLocation)
+    fmt.Println(UserRegister)
 
     err := godotenv.Load()
     if err != nil {
@@ -49,17 +63,16 @@ func main() {
         fmt.Printf("in development\n")
     }
 
-    mux := http.NewServeMux()
+    mux     := http.NewServeMux()
     handler := corsMiddleware(mux)
 
     mux.HandleFunc("/play", routes.Playthevideo)
     mux.HandleFunc("/check", routes.CheckProcess)
 
-    mux.HandleFunc("/ws", socket.TheWSconn)
+    mux.Handle("/ws", exampleWare(http.HandlerFunc(socket.TheWSconn)))
 
-    mux.HandleFunc("/lookdriver", routes.LookforDrivers)//users looking for drivers
+    mux.Handle("/lookdriver", exampleWare(http.HandlerFunc(routes.LookforDrivers)))//users looking for drivers
     mux.HandleFunc("/bevisible", routes.BeVisible) //for drivers
-
 
     mux.HandleFunc("/login", routes.Login)
     mux.HandleFunc("/register", routes.Register)

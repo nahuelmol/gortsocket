@@ -4,6 +4,7 @@ import (
     "fmt"
     "time"
     "math/rand"
+    "errors"
 )
 //location and coordinates are different entities
 
@@ -23,8 +24,12 @@ type User struct {
 }
 
 type Driver struct {
-    driver_id int32
+    id uint32
     coor Coordinate //driver's coordinates
+}
+
+func (driver *Driver) Identifier() uint32 {
+    return driver.id
 }
 
 func (driver *Driver) SetLocation(x,y int32) Coordinate {
@@ -34,14 +39,14 @@ func (driver *Driver) SetLocation(x,y int32) Coordinate {
     mycoor.yposition = y
     mycoor.pTime = time.Now()
 
-    driver.driver_id = int32(rand.Intn(101))
+    driver.id = uint32(rand.Intn(101))
     driver.coor = mycoor
 
     return mycoor
 }
 
 func (driver *Driver) getCoordinate() {
-    fmt.Printf("driver id:%d\n", driver.driver_id)
+    fmt.Printf("driver id:%d\n", driver.id)
     fmt.Printf("driver x:%d \n", driver.coor.xposition) 
     fmt.Printf("driver y:%d \n" , driver.coor.yposition) 
     fmt.Printf("driver time:%d\n", driver.coor.pTime.Hour()) 
@@ -100,8 +105,13 @@ func (sl *StackLocation) Pop() {
     sl.nodes = sl.nodes[:sl.length]
 }
 
-func (sl *StackLocation) Topdata() Coordinate {
-    return sl.head.data
+func (sl *StackLocation) Topdata() (Coordinate, error) {
+    nilco := new(Coordinate)
+    if sl.head == nil {
+        return *nilco, errors.New("not a head")
+    } else {
+        return sl.head.data, nil
+    }
 }
 
 func (sl *StackLocation) Nextdata() Coordinate {
@@ -109,7 +119,6 @@ func (sl *StackLocation) Nextdata() Coordinate {
 }
 
 func (sl *StackLocation) Wholedata() []*Node {
-    
     return sl.nodes
 }
 
