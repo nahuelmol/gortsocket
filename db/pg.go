@@ -2,28 +2,26 @@ package db
 
 import (
     "fmt"
+    "log"
     "strings"
     "database/sql"
+    "errors"
     
-    "github.com/lib/pq"
+    _ "github.com/mattn/go-sqlite3"
 )
 
 
-func pgConnection() sql.Open {
-    user := "nahuel"
-    dbname := "accountsdb"
-    sslmode := "verify-full"
-
-    connStr := user+ " " +dbname+ " " +sslmode 
-    db, err := sql.Open("postgres", connStr)
+func pgConnection() *sql.DB {
+    
+    db, err := sql.Open("sqlite3", "./test.db")
     if err != nil {
-        log.Fatal(err)
+        fmt.Println(err)
     }
 
     return db
 }
 
-func UserDataout(entire string) string {
+func UserDataout(entire string) map[string]string {
     var userData = make(map[string]string)
     exists_kv := false
     var (
@@ -33,62 +31,119 @@ func UserDataout(entire string) string {
 
     words := strings.Split(entire, " ")
     for _, word := range words {
-        for i, char := range word {
-            if char == "=" {
+        for _, char := range word {
+            if char == '=' {
                 exists_kv = true
                 key = value
                 value = ""
             } else {
-                value += char
+                value += string(char)
             }
         }
         if exists_kv {
-            userData[key] = term
+            userData[key] = value
             key = ""
-            term = ""
+            value = ""
+        } else {
+            key = ""
+            value = ""
         }
     }
+    return userData
 }
 
-func ActionOut(entire string) string {
+func ActionOut(entire string) (string, error){
     var action string
     for _, c := range entire {
         if c == ' ' {
-            return action
+            return action, nil
         }
-        action += c
+        action += string(c)
     }
-    return nil
+    return ("nil",errors.New("there's not an action"))
 }
 
-func matchDB(){
+func matchDB(username, password string) bool {
     db := pgConnection()
-    sqlcmd := fmt.Sprintf("SELECT * FROM users;")
-    row, err := db.Query(sqlcmd)
+    sqlcmd := fmt.Sprintf("SELECT %s FROM users;", username)
+    rows, err := db.Query(sqlcmd)
+    if err != nil {
+        fmt.Printf("error: %v", err)
+    }
+
+    //I need to get db password and compare it to the recently user's password
+
+    var values []interface{}
+    var all string
+    for rows.Next() {
+        if err := rows.Scan(values...); err != nil {
+            log.Fatal(err)
+        }
+    }
+
+    for _, val := range values {
+        all += fmt.Sprintln(val)
+    }
+
+    fmt.Printf("password:", password)
+    fmt.Println("passowrd in db:", all)
+
+    if all == password {
+        return true
+    } else {
+        return false
+    }
+    db.Close()
 }
+
+func delUser(){
+    db := pgConnection()
+    rawcmd := fmt.Sprintf("INSERT INTO users(name) VALUES(%s)", username)
+    err := db.Exec(rawcmd)
+    if err != nil {
+        fmt.Printf("error: %v", err)
+    }
+    db.Close()
+}
+
 
 func addUser(username, password string){
-    rawcmd := fmt.Sprintf("INSERT INTO users(name)
-	VALUES(%s) RETURNING id", username)
-    err := db.QueryRow(rawcmd).Scan(&userid)
+    db := pgConnection()
+    rawcmd := fmt.Sprintf("DELETE FROM users WHERE name = %s", username)
+    err := db.Exec(rawcmd)
+    if err != nil {
+        fmt.Printf("error: %v", err)
+    }
+    db.Close()
 }
 
-func PgQueries(cmd string) {
+func PgQueries(cmd string) bool {
+    //this works with "match username=nahuel password=verstappen33"
     action := ActionOut(cmd)
+    user := UserDataout(cmd)
+    username := user["username"]
+    password := user["password"]
 
     switch action {
-    case 'add':
+    case "add":
         addUser(username, password)
         fmt.Printf("adding")
-    case 'del':
+    case "del":
         fmt.Printf("deleting")
-    case 'upd':
+    case "upd":
         fmt.Printf("updating")
-    case 'match':
-        matchDB(username, password)
-        fmt.Printf("matching")
+    case "match":
+        doesmatch := matchDB(username, password)
+        if doesmatch {
+            fmt.Printf("user account exists")
+            return true 
+        } else {
+            return false
+        }
 
     default:
         fmt.Printf("unrecognized command")
-}
+    }
 
+    return false
+}
