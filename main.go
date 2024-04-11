@@ -1,6 +1,7 @@
 package main
 
 import ( 
+    "context"
     "fmt"
     "net/http"
     "log"
@@ -8,7 +9,7 @@ import (
 
     "github.com/joho/godotenv"
 
-    "personal/wsservice/obj"
+    //"personal/wsservice/obj"
     "personal/wsservice/routes"
     "personal/wsservice/wsocket"
 )
@@ -34,12 +35,27 @@ func corsMiddleware(next http.Handler) http.Handler {
     })
 }
 
-func exampleWare(next http.Handler) http.Handler {
+type typekey int
+const myKey typekey = 45
+
+func lookdriverWare(next http.Handler) http.Handler {
     nh := func(w http.ResponseWriter, r *http.Request){
 
-        fmt.Fprintf(w, "starting\n")
-        next.ServeHTTP(w, r)
-        fmt.Fprintf(w, "\nfinished")
+        fmt.Fprintf(w, "middleware for drivers\n")
+        next.ServeHTTP(w, r)//this is the call to the handler that does the real work
+        fmt.Fprintf(w, "\nfinished middleware\n")
+    }
+    return http.HandlerFunc(nh)
+}
+
+func wsocketWare(next http.Handler) http.Handler {
+    nh := func(w http.ResponseWriter, r *http.Request){
+
+        ctx := r.Context()
+        ctx = context.WithValue(ctx, "v", myKey)
+        r = r.WithContext(ctx)
+
+        next.ServeHTTP(w, r)//this is the call to the handler that does the real work
     }
     return http.HandlerFunc(nh)
 }
@@ -48,8 +64,8 @@ func main() {
     //driver1:=new(Driver)
     //driver1.setLocation(1,1)
     //driver1.getCoordinate()
-    UserRegister := make(map[uint32]*obj.StackLocation)
-    fmt.Println(UserRegister)
+    //UserRegister := make(map[uint32]*obj.StackLocation)
+    //fmt.Println(UserRegister)
 
     err := godotenv.Load()
     if err != nil {
@@ -69,9 +85,9 @@ func main() {
     mux.HandleFunc("/play", routes.Playthevideo)
     mux.HandleFunc("/check", routes.CheckProcess)
 
-    mux.Handle("/ws", exampleWare(http.HandlerFunc(socket.TheWSconn)))
+    mux.Handle("/ws", wsocketWare(http.HandlerFunc(socket.TheWSconn)))
 
-    mux.Handle("/lookdriver", exampleWare(http.HandlerFunc(routes.LookforDrivers)))//users looking for drivers
+    mux.Handle("/lookdriver", lookdriverWare(http.HandlerFunc(routes.LookforDrivers)))//users looking for drivers
     mux.HandleFunc("/bevisible", routes.BeVisible) //for drivers
 
     mux.HandleFunc("/login", routes.Login)

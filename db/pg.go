@@ -7,9 +7,9 @@ import (
     "database/sql"
     "errors"
     
-    _ "github.com/mattn/go-sqlite3"
+    //"github.com/mattn/go-sqlite3"
 )
-
+//this is more sqlite3 than postgres actually
 
 func pgConnection() *sql.DB {
     
@@ -52,7 +52,7 @@ func UserDataout(entire string) map[string]string {
     return userData
 }
 
-func ActionOut(entire string) (string, error){
+func ActionOut(entire string) (string, error) {
     var action string
     for _, c := range entire {
         if c == ' ' {
@@ -60,7 +60,7 @@ func ActionOut(entire string) (string, error){
         }
         action += string(c)
     }
-    return ("nil",errors.New("there's not an action"))
+    return "nil", errors.New("there's not an action")
 }
 
 func matchDB(username, password string) bool {
@@ -89,20 +89,24 @@ func matchDB(username, password string) bool {
     fmt.Println("passowrd in db:", all)
 
     if all == password {
+        db.Close()
         return true
     } else {
+        db.Close()
         return false
     }
     db.Close()
+    return false
 }
 
-func delUser(){
+func delUser(username string){
     db := pgConnection()
     rawcmd := fmt.Sprintf("INSERT INTO users(name) VALUES(%s)", username)
-    err := db.Exec(rawcmd)
+    val, err := db.Exec(rawcmd)
     if err != nil {
         fmt.Printf("error: %v", err)
     }
+    fmt.Println(val)
     db.Close()
 }
 
@@ -110,19 +114,25 @@ func delUser(){
 func addUser(username, password string){
     db := pgConnection()
     rawcmd := fmt.Sprintf("DELETE FROM users WHERE name = %s", username)
-    err := db.Exec(rawcmd)
+    val, err := db.Exec(rawcmd)
     if err != nil {
         fmt.Printf("error: %v", err)
     }
+    fmt.Println(val)
     db.Close()
 }
 
 func PgQueries(cmd string) bool {
     //this works with "match username=nahuel password=verstappen33"
-    action := ActionOut(cmd)
-    user := UserDataout(cmd)
+    action, err := ActionOut(cmd)
+    user        := UserDataout(cmd)
     username := user["username"]
     password := user["password"]
+
+    if err != nil {
+        fmt.Println("error handling the action")
+        return false
+    }
 
     switch action {
     case "add":
