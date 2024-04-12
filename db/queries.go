@@ -6,7 +6,6 @@ import (
     "time"
     "fmt"
 )
-
 var ctx = context.Background()
 
 func SetPair(key, value string){
@@ -19,7 +18,6 @@ func SetPair(key, value string){
 
 func GetPair(key string){
     conn := Conn()
-    
     val, err := conn.Get(ctx, key).Result()
     if err != nil {
         log.Println("error getting")
@@ -43,18 +41,25 @@ func AccessSetting(access_key string, user uint32) bool {
     }
 }
 
+func checkIntegraldb(access_key string) bool {
+    fmt.Println("checking integral db", access_key)
+    return false
+}
+
 func AccessKeyInDB(access_key string, user uint32) bool {
     userid := string(user)
-    fmt.Println("checking if access key for the user exists in db")
     conn := Conn()
     
     val, err := conn.Get(ctx, access_key).Result()
     if err != nil {
-        log.Println("error getting")
+        fmt.Println("error getting")
         return false
     } else {
         if val == userid {
-            log.Printf("value: %s exists", val)
+            fmt.Printf("value: %s exists in cache", val)
+            
+            checkIntegraldb(access_key)
+
             return true
         } else {
             //the access key exists but its owner is not user that is requireing it right now

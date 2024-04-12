@@ -40,7 +40,6 @@ const myKey typekey = 45
 
 func lookdriverWare(next http.Handler) http.Handler {
     nh := func(w http.ResponseWriter, r *http.Request){
-
         fmt.Fprintf(w, "middleware for drivers\n")
         next.ServeHTTP(w, r)//this is the call to the handler that does the real work
         fmt.Fprintf(w, "\nfinished middleware\n")
@@ -50,23 +49,15 @@ func lookdriverWare(next http.Handler) http.Handler {
 
 func wsocketWare(next http.Handler) http.Handler {
     nh := func(w http.ResponseWriter, r *http.Request){
-
         ctx := r.Context()
         ctx = context.WithValue(ctx, "v", myKey)
         r = r.WithContext(ctx)
-
         next.ServeHTTP(w, r)//this is the call to the handler that does the real work
     }
     return http.HandlerFunc(nh)
 }
 
 func main() {
-    //driver1:=new(Driver)
-    //driver1.setLocation(1,1)
-    //driver1.getCoordinate()
-    //UserRegister := make(map[uint32]*obj.StackLocation)
-    //fmt.Println(UserRegister)
-
     err := godotenv.Load()
     if err != nil {
         fmt.Printf("error loading the environment variables")
@@ -86,10 +77,9 @@ func main() {
     mux.HandleFunc("/check", routes.CheckProcess)
 
     mux.Handle("/ws", wsocketWare(http.HandlerFunc(socket.TheWSconn)))
-
     mux.Handle("/lookdriver", lookdriverWare(http.HandlerFunc(routes.LookforDrivers)))//users looking for drivers
-    mux.HandleFunc("/bevisible", routes.BeVisible) //for drivers
 
+    mux.HandleFunc("/bevisible", routes.BeVisible) //for drivers
     mux.HandleFunc("/login", routes.Login)
     mux.HandleFunc("/register", routes.Register)
     mux.HandleFunc("/logout", routes.Logout)

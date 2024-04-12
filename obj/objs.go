@@ -89,14 +89,13 @@ func CreateNode(newdata Coordinate) *Node {
     }
 }
 
-func (sl *StackLocation) Push(newnode *Node) *StackLocation {
+func (sl *StackLocation) Push(newnode *Node) {
     sl.next = sl.head
     sl.head = newnode
 
     sl.length += 1
     sl.nodes = append(sl.nodes, newnode)
 
-    return sl
 }
 
 func (sl *StackLocation) Pop() {

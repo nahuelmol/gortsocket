@@ -17,6 +17,15 @@ type DistanceStack struct {
     distances []*Distance
 }
 
+func CreateDistance(val float64) *Distance {
+    when := time.Now()
+
+    return &Distance {
+        when,
+        val,
+    }
+}
+
 func CreateDistancer() *DistanceStack{
     return &DistanceStack {
         head:nil,

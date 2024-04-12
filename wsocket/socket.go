@@ -13,23 +13,55 @@ import (
     "github.com/gorilla/websocket"
 )
 
+var HmanyConnections int32
 var UserRegister map[uint32]*obj.StackLocation
+
+func toStack(action string, node *obj.Node) func() bool {
+    stack := obj.CreateStack()
+    return func() bool {
+        switch action {
+        case "push":
+            stack.Push(node)
+        case "pop":
+            stack.Pop()
+        case "top":
+            stack.Topdata()
+        case "next":
+            stack.Nextdata()
+        case "whole":
+            stack.Wholedata()
+        case "lenght":
+            stack.Getlength()
+        default:
+            fmt.Println("unrecognized action")
+        }
+        return true
+    }
+}
+
+
+func locate(id, xloc, yloc uint32) {
+    driver := new(obj.Driver)
+    coor := driver.SetLocation(int32(xloc), int32(yloc))
+    node := obj.CreateNode(coor)
+
+    toStack("push", node)
+}
+
 
 var upgrader = websocket.Upgrader {
         ReadBufferSize: 1024,
         WriteBufferSize:1024,
 }
 
-var HmanyConnections int32
 
 func TheWSconn(w http.ResponseWriter, r *http.Request){
     conn, err := upgrader.Upgrade(w, r, nil)
     if err != nil {
         log.Println("Error upgrading")
     }
-
     contextValue := r.Context().Value("v")
-    fmt.Println("context value:",contextValue)
+    fmt.Println("context value:", contextValue)
 
     defer conn.Close()
     for {
@@ -51,6 +83,8 @@ func TheWSconn(w http.ResponseWriter, r *http.Request){
             if !source_exists {
                 message := "source is nil"
                 err = conn.WriteMessage(websocket.TextMessage, []byte(message))
+            } else {
+                fmt.Println("source: ", source)
             }
 
             username, uname_exists := params["username"]
@@ -82,7 +116,7 @@ func TheWSconn(w http.ResponseWriter, r *http.Request){
                     if oku {
                         fmt.Println("identified user triyng conn!")
                     } else {
-                        message = "your are generic, bad day\n"
+                        message = "your are generic, bad day"
                         conn.WriteMessage(websocket.TextMessage, []byte(message))
                     }
                 }
@@ -97,11 +131,20 @@ func TheWSconn(w http.ResponseWriter, r *http.Request){
                     src = "driver"
                     id = did
                     fmt.Println("it's a driver")
+
+                    //put its location in the stack
+                    xloc, xok := params["xlocation"].(uint32) 
+                    yloc, yok := params["ylocation"].(uint32) 
+
+                    if !xok || !yok {
+                        return 
+                    }
+
+                    locate(id, xloc, yloc)
                 } else if !oku && !okd {
                     fmt.Println("it's not a driver or user")
                 } else {
                     src = "monster"
-                    fmt.Println("wtf!!")
                 }
 
                 message := BuildgroupMsg(id, src)
@@ -111,7 +154,7 @@ func TheWSconn(w http.ResponseWriter, r *http.Request){
             }
 
         case websocket.BinaryMessage:
-            log.Println("binary message")
+            fmt.Println(p)
         }
 
         err = conn.WriteMessage(websocket.TextMessage, []byte("received by server"))

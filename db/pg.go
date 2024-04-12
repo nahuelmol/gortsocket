@@ -70,7 +70,6 @@ func matchDB(username, password string) bool {
     if err != nil {
         fmt.Printf("error: %v", err)
     }
-
     //I need to get db password and compare it to the recently user's password
 
     var values []interface{}
