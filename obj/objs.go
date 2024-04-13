@@ -73,7 +73,6 @@ type StackLocation struct {
 }
 
 func  CreateStack() *StackLocation{
-
     return &StackLocation {
         head:nil,
         next:nil,
@@ -95,7 +94,6 @@ func (sl *StackLocation) Push(newnode *Node) {
 
     sl.length += 1
     sl.nodes = append(sl.nodes, newnode)
-
 }
 
 func (sl *StackLocation) Pop() {
