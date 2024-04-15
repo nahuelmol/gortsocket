@@ -5,4 +5,4 @@
 
 ## notes
 
-I could create two Stacks and one single closure or two closures using one single stack
+I could create two Stacks (user and dirver) and one single closure or two closures using one single stack

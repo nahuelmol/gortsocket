@@ -73,18 +73,23 @@ func toStackLocationDriver() func(action string, node *obj.Node) (*obj.Node, err
     }
 }
 
-func toStackDistance(action string, distance *obj.Distance) func() bool {
+func ToDistance() func(string, *obj.Distance) (*obj.Distance, error) {
     stack := obj.CreateDistancer()
-    return func() bool {
+    return func(action string, distance *obj.Distance) (*obj.Distance, error) {
         switch action {
         case "push":
             stack.Push(distance)
+            return nil, nil
         case "pop":
             stack.Pop()
+            return nil, nil
+        case "top":
+            lastDistance := stack.Gethead()
+            return lastDistance, nil
         default:
             fmt.Println("unrecognized action")
+            return nil, nil
         }
-        return true
     }
 }
 
@@ -102,9 +107,9 @@ func Takeout(result *obj.Node, _ error) obj.Coordinate {
 
     var x int32
     var y int32
-
     xx := data.FieldByName("Xposition")
     yy := data.FieldByName("Yposition")
+
     if xx.Kind() == reflect.Int32 || yy.Kind() == reflect.Int32 {
         xvalue := int32(xx.Int())
         yvalue := int32(yy.Int())
@@ -133,9 +138,30 @@ func locate(id, xloc, yloc uint32) {
     lastuser    := Takeout(stack_user("top", nil))
 
     distance    := obj.CalculateDistance(lastdriver, lastuser)
-    fmt.Println(distance)
+    dist_instance := obj.CreateDistance(float64(distance))
+    
+    distancer := ToDistance()
+    distancer("push", dist_instance)
 
-    //toStackDistance("psuh", distance)
+    head, err := distancer("top", nil)
+    if err != nil {
+        fmt.Println("error taking the head")
+    }
+
+    HEAD := reflect.ValueOf(head)
+    if HEAD.Kind() == reflect.Ptr {
+        HEAD = HEAD.Elem()
+    }
+    val := HEAD.FieldByName("val")
+
+    var topdistance float64
+    if val.Kind() == reflect.Float64 {
+        topdistance = float64(val.Float())
+    } else {
+        fmt.Println("the distance is not even a float64")
+    }
+
+    fmt.Println("topdistance:", topdistance)
 }
 
 func BuildgroupMsg(id uint32, typeof string) string {
