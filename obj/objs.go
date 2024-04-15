@@ -9,10 +9,10 @@ import (
 //location and coordinates are different entities
 
 type Coordinate struct {
-    xposition int32 
-    yposition int32
+    Xposition int32 
+    Yposition int32
 
-    pTime time.Time
+    Time time.Time
 }
 
 type User struct {
@@ -35,9 +35,9 @@ func (driver *Driver) Identifier() uint32 {
 func (driver *Driver) SetLocation(x,y int32) Coordinate {
     //function that takes the current time and save it into a time variable
     var mycoor Coordinate
-    mycoor.xposition = x
-    mycoor.yposition = y
-    mycoor.pTime = time.Now()
+    mycoor.Xposition = x
+    mycoor.Yposition = y
+    mycoor.Time = time.Now()
 
     driver.id = uint32(rand.Intn(101))
     driver.coor = mycoor
@@ -47,9 +47,9 @@ func (driver *Driver) SetLocation(x,y int32) Coordinate {
 
 func (driver *Driver) getCoordinate() {
     fmt.Printf("driver id:%d\n", driver.id)
-    fmt.Printf("driver x:%d \n", driver.coor.xposition) 
-    fmt.Printf("driver y:%d \n" , driver.coor.yposition) 
-    fmt.Printf("driver time:%d\n", driver.coor.pTime.Hour()) 
+    fmt.Printf("driver x:%d \n", driver.coor.Xposition) 
+    fmt.Printf("driver y:%d \n" , driver.coor.Yposition) 
+    fmt.Printf("driver time:%d\n", driver.coor.Time.Hour()) 
 }
 
 type Node struct {
@@ -57,9 +57,9 @@ type Node struct {
 }
 
 func (nn *Node) SeeData() Coordinate {
-    fmt.Println(nn.data.xposition)
-    fmt.Println(nn.data.yposition)
-    fmt.Println(nn.data.pTime)
+    fmt.Println(nn.data.Xposition)
+    fmt.Println(nn.data.Yposition)
+    fmt.Println(nn.data.Time)
 
     return nn.data
 }
@@ -72,7 +72,7 @@ type StackLocation struct {
     nodes []*Node
 }
 
-func  CreateStack() *StackLocation{
+func CreateStack() *StackLocation{
     return &StackLocation {
         head:nil,
         next:nil,
@@ -102,12 +102,11 @@ func (sl *StackLocation) Pop() {
     sl.nodes = sl.nodes[:sl.length]
 }
 
-func (sl *StackLocation) Topdata() (Coordinate, error) {
-    nilco := new(Coordinate)
+func (sl *StackLocation) Topdata() (*Node, error) {
     if sl.head == nil {
-        return *nilco, errors.New("not a head")
+        return nil, errors.New("not a head")
     } else {
-        return sl.head.data, nil
+        return sl.head, nil
     }
 }
 

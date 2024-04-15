@@ -1,16 +1,15 @@
 package obj
 
 import ( 
-    "fmt"
     "math"
 )
-func abs(val_1, val_2 float64) float64 {
-    var result float64
+
+func abs(val_1, val_2 int32) float64 {
     if val_1 > val_2 {
-        result = val_1 - val_2
+        result := float64(val_1) - float64(val_2)
         return result
     } else {
-        result = val_2 - val_1
+        result := float64(val_2) - float64(val_1)
         return result
     }
 }
@@ -25,8 +24,8 @@ func eulerian(xdis, ydis float64) float64 {
 func CalculateDistance(driver Coordinate, user Coordinate) float64 {
     //take the last location in user Stack
     //take the last location in dirver Stack
-    xdis := abs(user.x, driver.xposition)
-    ydis := abs(user.y, driver.yposition)
+    xdis := abs(user.Xposition, driver.Xposition)
+    ydis := abs(user.Yposition, driver.Yposition)
     distance := eulerian(xdis, ydis)
     return distance
 }

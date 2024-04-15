@@ -3,27 +3,84 @@ package socket
 import (
     "fmt"
     "errors"
+    "reflect"
+    "time"
 
     "personal/wsservice/obj"
-    "personal/wsservice/distance"
 )
 
-func toStackLocationUser(action string, node *obj.Node) func() bool {
+func toStackLocationUser() func(string, *obj.Node) (*obj.Node, error){
     stack := obj.CreateStack()
-    return func() bool {
+    return func(action string, node *obj.Node) (*obj.Node, error) {
         switch action {
         case "push":
             stack.Push(node)
+            return nil, nil
         case "pop":
             stack.Pop()
+            return nil, nil
         case "top":
-            stack.Topdata()
+            result, err := stack.Topdata()
+            if err != nil {
+                return nil, errors.New("just error")
+            }
+            return result, nil
         case "next":
             stack.Nextdata()
+            return nil, nil
         case "whole":
             stack.Wholedata()
+            return nil, nil
         case "lenght":
             stack.Getlength()
+            return nil, nil
+        default:
+            fmt.Println("unrecognized action")
+            return nil, nil
+        }
+    }
+}
+
+func toStackLocationDriver() func(action string, node *obj.Node) (*obj.Node, error) {
+    stack := obj.CreateStack()
+    return func(action string, node *obj.Node) (*obj.Node, error) {
+        switch action {
+        case "push":
+            stack.Push(node)
+            return nil, nil
+        case "pop":
+            stack.Pop()
+            return nil, nil
+        case "top":
+            result, err := stack.Topdata()
+            if err != nil {
+                return nil, errors.New("just error")
+            }
+            return result, nil
+        case "next":
+            stack.Nextdata()
+            return nil, nil
+        case "whole":
+            stack.Wholedata()
+            return nil, nil
+        case "lenght":
+            stack.Getlength()
+            return nil, nil
+        default:
+            fmt.Println("unrecognized action")
+            return nil, nil
+        }
+    }
+}
+
+func toStackDistance(action string, distance *obj.Distance) func() bool {
+    stack := obj.CreateDistancer()
+    return func() bool {
+        switch action {
+        case "push":
+            stack.Push(distance)
+        case "pop":
+            stack.Pop()
         default:
             fmt.Println("unrecognized action")
         }
@@ -31,50 +88,35 @@ func toStackLocationUser(action string, node *obj.Node) func() bool {
     }
 }
 
-func toStackLocationDriver(action string, node *obj.Node) func() bool {
-    stack := obj.CreateStack()
-    return func() bool {
-        switch action {
-        case "push":
-            stack.Push(node)
-        case "pop":
-            stack.Pop()
-        case "top":
-            stack.Topdata()
-        case "next":
-            stack.Nextdata()
-        case "whole":
-            stack.Wholedata()
-        case "lenght":
-            stack.Getlength()
-        default:
-            fmt.Println("unrecognized action")
-        }
-        return true
+func Takeout(result *obj.Node, _ error) obj.Coordinate {
+    val := reflect.ValueOf(result)
+    if val.Kind() == reflect.Ptr {
+        val = val.Elem()
     }
-}
+    data := val.FieldByName("data")
+    if data.IsValid() {
+        fmt.Println("is valid")
+    } else {
+        fmt.Println("not valid")
+    }
 
-func toStackDistance(action string, node *obj.Node) func() bool {
-    stack := distance.CreateStack()
-    return func() bool {
-        switch action {
-        case "push":
-            stack.Push(node)
-        case "pop":
-            stack.Pop()
-        case "top":
-            stack.Topdata()
-        case "next":
-            stack.Nextdata()
-        case "whole":
-            stack.Wholedata()
-        case "lenght":
-            stack.Getlength()
-        default:
-            fmt.Println("unrecognized action")
-        }
-        return true
+    var x int32
+    var y int32
+
+    xx := data.FieldByName("Xposition")
+    yy := data.FieldByName("Yposition")
+    if xx.Kind() == reflect.Int32 || yy.Kind() == reflect.Int32 {
+        xvalue := int32(xx.Int())
+        yvalue := int32(yy.Int())
+        x = xvalue
+        y = yvalue
+    } else {
+        fmt.Println("is not an int32")
     }
+
+    rightnow := time.Now()
+    coor := obj.Coordinate { Xposition:x, Yposition:y, Time:rightnow }
+    return coor 
 }
 
 func locate(id, xloc, yloc uint32) {
@@ -82,14 +124,18 @@ func locate(id, xloc, yloc uint32) {
     coor    := driver.SetLocation(int32(xloc), int32(yloc))
     node    := obj.CreateNode(coor)
 
-    toStackLocationDriver("push", node)//driver
-    toStackLocationUser("push", node) //user
+    stack_driv := toStackLocationDriver()//driver
+    stack_user := toStackLocationUser() //user
 
-    lastDriver  := toStackLocationDriver("top")
-    lastUser    := toStackLocationUser("top")
-    distance    := CalculateDistance(lastDriver, lastUser)
+    stack_driv("push", node)
 
-    toStackDistance("psuh", distance)
+    lastdriver  := Takeout(stack_driv("top", nil))
+    lastuser    := Takeout(stack_user("top", nil))
+
+    distance    := obj.CalculateDistance(lastdriver, lastuser)
+    fmt.Println(distance)
+
+    //toStackDistance("psuh", distance)
 }
 
 func BuildgroupMsg(id uint32, typeof string) string {
