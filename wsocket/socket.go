@@ -60,6 +60,22 @@ func TheWSconn(w http.ResponseWriter, r *http.Request){
                 break
             }
 
+            _, urequest := params["urequest"] //that's what a driver receives
+            if urequest {
+                id, driver := params["todriver"]
+                if driver {
+                    fmt.Println("user is sending a request to ", id)
+                    message := "user wants: " + string(id)
+                    conn.WriteMessage(websocket.TextMessage, []byte(message))
+                    //email messaging?
+                    //private socket, private message between user-driver
+                    //(if driver accepts)
+                } else {
+                    fmt.Println("theres not a driver to request")
+                }
+            }
+
+
         case websocket.BinaryMessage:
             fmt.Println(p)
         }
