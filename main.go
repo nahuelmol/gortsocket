@@ -9,7 +9,6 @@ import (
 
     "github.com/joho/godotenv"
 
-    //"personal/wsservice/obj"
     "personal/wsservice/routes"
     "personal/wsservice/wsocket"
 )
@@ -73,14 +72,11 @@ func main() {
     mux     := http.NewServeMux()
     handler := corsMiddleware(mux)
 
-    mux.HandleFunc("/play", routes.Playthevideo)
-    mux.HandleFunc("/check", routes.CheckProcess)
-
     mux.Handle("/ws", wsocketWare(http.HandlerFunc(socket.TheWSconn)))
     mux.Handle("/lookdriver", lookdriverWare(http.HandlerFunc(routes.LookforDrivers)))//users looking for drivers
 
     mux.HandleFunc("/bevisible", routes.BeVisible) //for drivers
-    mux.HandleFunc("/login", routes.Login)
+    mux.HandleFunc("/login", routes.Login) 
     mux.HandleFunc("/register", routes.Register)
     mux.HandleFunc("/logout", routes.Logout)
 
