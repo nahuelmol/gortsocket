@@ -3,7 +3,24 @@ package middlewares
 import (
     "net/http"
     "strings"
+    "log"
 )
+
+func CookiesMiddleware(next http.Handler) http.Handler {
+    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request){
+        cookies := r.Cookies()
+        for _, cookie := range cookies {
+            log.Printf("cookie name: ", cookie.Name)
+        }
+    })
+}
+
+func LogMiddleware(next http.Handler) http.Handler {
+    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request){
+        log.Printf("Request: %s %s", r.Method, r.URL.Path)
+        next.ServeHTTP(w,r)
+    })
+}
 
 func JSMiddleware(next http.Handler) http.Handler {
     return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request){

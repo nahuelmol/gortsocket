@@ -58,6 +58,8 @@ func main() {
     mux     := http.NewServeMux()
     handler := middlewares.CorsMiddleware(mux)
     handler = middlewares.JSMiddleware(handler)
+    handler = middlewares.LogMiddleware(handler)
+    handler = middlewares.CookiesMiddleware(handler)
 
     mux.Handle("/ws", wsocketWare(http.HandlerFunc(socket.TheWSconn)))
     mux.Handle("/lookdriver", lookdriverWare(http.HandlerFunc(routes.LookforDrivers)))//users looking for drivers
