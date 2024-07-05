@@ -11,28 +11,13 @@ import (
 
     "personal/wsservice/routes"
     "personal/wsservice/wsocket"
+    "personal/wsservice/middlewares"
 )
 
 type IPv4 int
 type IPv6 int
 
 var hmanyConnections int = 0
-
-func corsMiddleware(next http.Handler) http.Handler {
-    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request){
-        w.Header().Set("Access-Control-Allow-Origin", "http://localhost:8080")
-        w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-        w.Header().Set("Access-Control-Allow-Headers", "Origin, Content-type")
-        w.Header().Set("Access-Control-Allow-Credentials", "true")
-
-        if r.Method == "OPTIONS" {
-            w.WriteHeader(http.StatusOK)
-            return
-        }
-
-        next.ServeHTTP(w, r)
-    })
-}
 
 type typekey int
 const myKey typekey = 45
@@ -56,6 +41,7 @@ func wsocketWare(next http.Handler) http.Handler {
     return http.HandlerFunc(nh)
 }
 
+
 func main() {
     err := godotenv.Load()
     if err != nil {
@@ -70,11 +56,16 @@ func main() {
     }
 
     mux     := http.NewServeMux()
-    handler := corsMiddleware(mux)
+    handler := middlewares.CorsMiddleware(mux)
+    handler = middlewares.JSMiddleware(handler)
 
     mux.Handle("/ws", wsocketWare(http.HandlerFunc(socket.TheWSconn)))
     mux.Handle("/lookdriver", lookdriverWare(http.HandlerFunc(routes.LookforDrivers)))//users looking for drivers
 
+    fileServer := http.FileServer(http.Dir("./public"))
+    mux.Handle("/", fileServer)
+
+    mux.HandleFunc("/home", routes.Home)
     mux.HandleFunc("/bevisible", routes.BeVisible) //for drivers
     mux.HandleFunc("/login", routes.Login) 
     mux.HandleFunc("/register", routes.Register)
