@@ -9,8 +9,8 @@ import (
     "math/rand"
     "net/http"
     "html/template"
+    "path/filepath"
 
-    //"personal/wsservice/obj"
     "personal/wsservice/wsocket"
 
     "github.com/gorilla/websocket"
@@ -119,10 +119,16 @@ func LookforDrivers(w http.ResponseWriter, r *http.Request){
 }
 
 func Home(w http.ResponseWriter, r *http.Request){
-    tmpl := template.Must(template.ParseFiles("public/views/index.html"))
-    err  := tmpl.Execute(w, nil)
+    //tmpl, err := template.Must(template.ParseFiles("public/views/index.html"))
+    tmpl, err := template.ParseFiles(filepath.Join("public", "views/index.html"))
     if err != nil {
+        http.Error(w, "Error parsing the html file", http.StatusInternalServerError)
+        return
+    }
+    errx := tmpl.Execute(w, nil)
+    if errx != nil {
         http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
     }
 }
 
