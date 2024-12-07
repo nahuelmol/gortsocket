@@ -73,6 +73,8 @@ func main() {
     mux.HandleFunc("/register", routes.Register)
     mux.HandleFunc("/logout", routes.Logout)
 
+    //mux.HandleFunc("/product/{id:[0-9]+}", routes.RegexProve)
+
     log.Printf("starting on localhost%s", port)
     http.ListenAndServe(port, handler)
 }

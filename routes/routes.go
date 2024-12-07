@@ -14,6 +14,7 @@ import (
     "personal/wsservice/wsocket"
 
     "github.com/gorilla/websocket"
+    //"github.com/gorilla/mux"
 )
 var Mutex sync.Mutex
 
@@ -40,7 +41,6 @@ func BeVisible(w http.ResponseWriter, r *http.Request){
     fmt.Printf("making the driver visible")
     ch := make(chan string,3)
     
-
     latStr := r.URL.Query().Get("lat")
     lonStr := r.URL.Query().Get("lon")
     lat, err := strconv.ParseFloat(latStr, 64)
@@ -63,7 +63,7 @@ func BeVisible(w http.ResponseWriter, r *http.Request){
     //driver := new(obj.Driver)
     //Slocation := obj.CreateStack()
     
-    //coor := driver.SetLocation(4,4) //random initial location
+    //coor := driver.SetLocation(4,4) //whatever location
     //node := obj.CreateNode(coor)
     
     //driver_id := driver.Identifier()
@@ -117,6 +117,7 @@ func LookforDrivers(w http.ResponseWriter, r *http.Request){
     w.Header().Set("Content-Type","text/plain")
     fmt.Fprintf(w, "drivers")
 }
+
 
 func Home(w http.ResponseWriter, r *http.Request){
     //tmpl, err := template.Must(template.ParseFiles("public/views/index.html"))
